@@ -3,7 +3,6 @@ import logging
 from typing import Any
 
 from core.simulated_annealing import Response
-from tools.metrics import ComparisonStatistics
 from algorithm.smt_state import SMTState
 from entities.smt_entities import LineAllocation
     
@@ -75,46 +74,6 @@ def table_responses(results: list[tuple[dict[str, Any], Response]], save_path: s
         logging.info(f"[table_responses] Tabela de resultados detalhada gerada em: {save_path}")
     except Exception as e:
         logging.error(f"[table_responses] Erro ao salvar a tabela: {e}")
-
-def comparison_table(comparisons: list[ComparisonStatistics], save_path: str = 'comparison_table.csv') -> None:
-    """
-    Gera um arquivo CSV comparando as métricas do estado histórico com o estado otimizado.
-    
-    Args:
-        comparisons (list[ComparisonStatistics]): Lista com os resultados de comparação.
-        save_path (str): Caminho do arquivo onde a tabela será salva.
-    """
-    if not comparisons:
-        logging.warning("[comparison_table] A lista de comparações está vazia.")
-        return
-
-    headers = [
-        "Nome",
-        "Energia Histórica",
-        "Tempo de Setup Histórico",
-        "Energia Otimizada",
-        "Tempo de Setup Otimizado",
-        "Ganho (%)"
-    ]
-
-    try:
-        with open(save_path, mode='w', newline='', encoding='utf-8') as file:
-            writer = csv.writer(file, delimiter=',')
-            writer.writerow(headers)
-
-            for comp in comparisons:
-                writer.writerow([
-                    round(comp.name, 4),
-                    round(comp.historical.energy, 4),
-                    round(comp.historical.setup_transition_time, 4),
-                    round(comp.optimized.energy, 4),
-                    round(comp.optimized.setup_transition_time, 4),
-                    round(comp.gain * 100, 2)
-                ])
-                
-        logging.info(f"[comparison_table] Tabela de comparação gerada em: {save_path}")
-    except Exception as e:
-        logging.error(f"[comparison_table] Erro ao salvar a tabela: {e}")
 
 def smts_table(states = list[SMTState], save_path: str = 'smt_table.csv')->None:
     if not states:

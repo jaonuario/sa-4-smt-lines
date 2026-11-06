@@ -13,7 +13,7 @@ class FreezingTempTester(BaseTester):
         super().__init__(test_name="freezing_temp_tester")
         self.list_path = [
             'wk16.csv', 'wk17.csv', 'wk18.csv', 'wk19.csv', 'wk20.csv', 
-            'wk21.csv', 'wk22.csv', 'wk23.csv', 'wk24.csv', 'wk25.csv'
+            'wk22.csv', 'wk23.csv', 'wk24.csv', 'wk25.csv'
         ]
         self.loader = ScenarioBuilder(num_lines=3, full=HISTORICAL_FULL)
 

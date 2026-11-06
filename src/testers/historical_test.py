@@ -15,7 +15,7 @@ class TestHistorico(BaseTester):
         # Escopo de Análise: Múltiplas semanas para testar variabilidade da fábrica
         self.list_path = [
             'wk16.csv', 'wk17.csv', 'wk18.csv', 'wk19.csv', 'wk20.csv', 
-            'wk21.csv', 'wk22.csv', 'wk23.csv', 'wk24.csv', 'wk25.csv'
+            'wk22.csv', 'wk23.csv', 'wk24.csv', 'wk25.csv'
         ]
         self.repository = HistoricalBalancingRepository()
 
