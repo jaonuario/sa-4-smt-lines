@@ -1,6 +1,4 @@
 class BaseAppError(Exception):
-    """Base para exceções de domínio da aplicação."""
-
     message: str
 
     def __init__(self, message: str | None = None) -> None:

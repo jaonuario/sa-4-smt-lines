@@ -65,10 +65,6 @@ def plot_temperature_route_graph(state, save_path):
 
 
 def plot_priority_route_graph(state, save_path):
-    """
-    Função especializada para plotar a prioridade usando um Mapa de Calor (Heatmap).
-    Cores quentes (Vermelho) = Alta Prioridade. Cores frias (Azul) = Baixa Prioridade.
-    """
     allocations = state.get_allocations()
     attr_name = NodeColorAttribute.PRIORITY.value
 
@@ -80,18 +76,15 @@ def plot_priority_route_graph(state, save_path):
             if val is not None:
                 unique_values.add(val)
 
-    # Ordena as prioridades. Assume que são números (ex: 1, 2, 3...)
     try:
         unique_values = sorted(list(unique_values), key=float)
     except ValueError:
         unique_values = sorted(list(unique_values))
 
-    # Usa a paleta Frio -> Quente nativa do matplotlib
     cmap = plt.get_cmap('coolwarm')
     color_mapping = {}
     
     for i, val in enumerate(unique_values):
-        # Normaliza a posição da cor entre 0.0 (Azul/Frio) e 1.0 (Vermelho/Quente)
         norm = i / max(1, len(unique_values) - 1)        
         color_mapping[val] = cmap(1.0 - norm)
 
@@ -121,27 +114,23 @@ def plot_standard_route_graph(state, color_attribute: NodeColorAttribute, save_p
 
 def _draw_graph(state, attr_name, color_mapping, unique_values, title_suffix, save_path):
     allocations = state.get_allocations()
-    # Aumenta a altura proporcionalmente para não amassar nós se tivermos muitas linhas
     fig, ax = plt.subplots(figsize=(14, max(4, 1.5 * len(allocations)))) 
     G = nx.DiGraph()
     pos = {}
     node_colors = []
     labels = {}
 
-    # Contador para garantir ID único no Grafo (evita colisões de node_id)
     node_counter = 0
 
     for y_idx, alloc in enumerate(allocations):
         ops = alloc.pinned_products + alloc.products
         
-        # Desenha a linha de fundo
         ax.plot([-0.5, max(0, len(ops) - 0.5)], [-y_idx, -y_idx], 
                 color='#e0e0e0', linestyle=':', zorder=0)
         ax.text(-0.8, -y_idx, f"Linha {alloc.plan_line_id}", 
                 fontsize=11, fontweight='bold', va='center', ha='right')
 
         for x_idx, op in enumerate(ops):
-            # ID único global no Grafo, mas mantém o label legível
             node_id = node_counter 
             node_counter += 1
             
@@ -149,7 +138,7 @@ def _draw_graph(state, attr_name, color_mapping, unique_values, title_suffix, sa
             pos[node_id] = (x_idx, -y_idx) 
 
             val = getattr(op, attr_name, None)
-            node_colors.append(color_mapping.get(val, '#808080')) # Cinza para valores ausentes
+            node_colors.append(color_mapping.get(val, '#808080'))
             labels[node_id] = str(op.plan_item_id)
 
             if x_idx > 0:
@@ -161,7 +150,6 @@ def _draw_graph(state, attr_name, color_mapping, unique_values, title_suffix, sa
                 font_color='white', font_weight='bold', edge_color='#666666',
                 arrows=True, arrowsize=15)
 
-    # Legenda inteligente
     if unique_values:
         legend_patches = [mpatches.Patch(color=color_mapping[val], label=str(val))
                          for val in unique_values if val in color_mapping]
@@ -175,7 +163,6 @@ def _draw_graph(state, attr_name, color_mapping, unique_values, title_suffix, sa
 
 
 def plot_state_route_graph(state, color_attribute: NodeColorAttribute = NodeColorAttribute.TEMPERATURE_PROFILE, save_path='estado_grafo.png'):
-    # O Roteador agora gerencia 3 caminhos de desenho diferentes
     if color_attribute == NodeColorAttribute.TEMPERATURE_PROFILE:
         plot_temperature_route_graph(state, save_path)
     elif color_attribute == NodeColorAttribute.PRIORITY:
@@ -184,44 +171,33 @@ def plot_state_route_graph(state, color_attribute: NodeColorAttribute = NodeColo
         plot_standard_route_graph(state, color_attribute, save_path)
 
 def plot_side_by_side_comparison(state, save_path, title = "Comparativo"):
-    """
-    Gera um comparativo visual: Forno (topo) vs Prioridade (baixo)
-    para cada linha de produção.
-    """
     allocations = state.get_allocations()
     n_lines = len(allocations)
     
-    # Criamos 2 subplots por linha: um para forno, outro para prioridade
     fig, axes = plt.subplots(nrows=n_lines * 2, ncols=1, 
                              figsize=(14, 4 * n_lines), 
                              sharex=True, 
                              gridspec_kw={'hspace': 0.3})
     
-    # Se houver apenas uma linha, axes não será um array, forçamos ser
     if n_lines == 1: axes = [axes]
     
-    # Cores fixas para garantir consistência visual
     oven_cmap = plt.get_cmap('tab20')
     priority_cmap = plt.get_cmap('coolwarm')
     
     for i, alloc in enumerate(allocations):
         ops = alloc.pinned_products + alloc.products
         
-        # Índices dos eixos para esta linha
         ax_oven = axes[i * 2]
         ax_prio = axes[i * 2 + 1]
         
-        # Dados para Plotagem
         x = range(len(ops))
         oven_vals = sorted([op.temperature_profile_code for op in ops])
         prio_vals = [float(op.priority) for op in ops]
         
-        # --- Plotagem Forno ---
         ax_oven.step(x, oven_vals, where='post', color='teal', marker='o')
         ax_oven.set_title(f"Linha {alloc.plan_line_id} - Perfil de Forno", fontsize=10, fontweight='bold')
         ax_oven.grid(True, linestyle=':', alpha=0.6)
         
-        # --- Plotagem Prioridade ---
         ax_prio.bar(x, prio_vals, color='salmon', alpha=0.7)
         ax_prio.set_title(f"Linha {alloc.plan_line_id} - Prioridade (Quanto maior, mais urgente)", fontsize=10)
         ax_prio.grid(True, linestyle=':', alpha=0.6)

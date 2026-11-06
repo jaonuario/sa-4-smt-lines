@@ -21,14 +21,12 @@ class OP:
     def __post_init__(self) -> None:
         erros = []
 
-        # Validação do total_time
         if not self.total_time:
             erros.append(f"total_time está vazio")
         elif any(v <= 0 for v in self.total_time.values()):
             invalidos = [k for k, v in self.total_time.items() if v <= 0]
             erros.append(f"total_time contém valores <= 0 nas chaves: {invalidos}")
 
-        # Validação do oven_transition_costs
         if not self.oven_transition_costs:
             erros.append(f"oven_transition_costs está vazio")
         elif any(v <= 0 for v in self.oven_transition_costs.values()):
@@ -56,11 +54,6 @@ class OP:
 
 @dataclass
 class LineAllocation:
-    """
-    Representa a alocação de uma linha de produção específica no plano.
-    Esta classe encapsula o ID da linha e a sequência de OPs alocadas.
-    """
-    
     plan_line_id: int
     products: list["OP"] = field(default_factory=list) #type: ignore
     pinned_products: list["OP"] = field(default_factory=list) #type: ignore
@@ -85,7 +78,6 @@ class LineAllocation:
     
     @property
     def total_ops(self) -> int:
-        """Retorna a quantidade total de ordens (dinâmicas + fixadas) nesta linha."""
         return len(self.pinned_products) + len(self.products)
 
     def __repr__(self) -> str:

@@ -9,7 +9,6 @@ class ProductRateRepository(BaseRepository):
         self._delimiter = delimiter
 
     def _parse_rate(self, val: str) -> float:
-        """Centraliza o parseamento seguro de string para float com suporte a decimais com vírgula."""
         val_clean = val.strip().replace(',', '.')
         if not val_clean:
             return 0.0
@@ -19,16 +18,11 @@ class ProductRateRepository(BaseRepository):
             return 0.0
 
     def _calculate_total_upm(self, top_hours_per_1k: float, bot_hours_per_1k: float) -> float:
-        """
-        CORREÇÃO FÍSICA: Soma os tempos (horas) de TOP e BOT primeiro.
-        Depois converte o tempo total para UPM (Unidades Por Minuto).
-        """
         total_hours = top_hours_per_1k + bot_hours_per_1k
         
         if total_hours <= 0:
             return 0.0
             
-        # Fórmula: 1000 peças / (Total de Horas * 60 minutos) = Peças por minuto
         return 1000.0 / (total_hours * 60.0)
 
     def get_all_rates(self) -> dict[int, dict[int, float]]:
@@ -74,9 +68,6 @@ class ProductRateRepository(BaseRepository):
         return all_rates
     
     def get_all_rates_full(self, num_lines: int = 3) -> dict[int, dict[int, float]]:
-        """
-        Relaxamento de Restrições e Escalonamento para Testes.
-        """
         if num_lines < 1:
             raise ValueError("O argumento 'num_lines' deve ser maior que zero.")
 
@@ -116,7 +107,6 @@ class ProductRateRepository(BaseRepository):
                     if not taxas_validas:
                         continue
 
-                    # Assumimos a MAIOR taxa (UPM mais rápido) como referência para as linhas ausentes
                     taxa_ref = max(taxas_validas) 
 
                     machine_rates = {}

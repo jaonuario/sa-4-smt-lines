@@ -44,7 +44,7 @@ class OvenTransitionRepository(BaseRepository):
                             
                         cost_clean = cost_str.strip()
                         if not cost_clean:
-                            continue  # Célula vazia, ignora e segue para a próxima
+                            continue
                             
                         try:
                             cost_val = float(cost_clean.replace(',', '.'))

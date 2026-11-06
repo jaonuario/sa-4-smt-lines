@@ -11,11 +11,9 @@ def validate_product_times(filename: str = 'wk16.csv'):
     print("="*60)
     
     try:
-        # 1. Carrega os dados do histórico humano
         repo = HistoricalBalancingRepository()
         historical_data = repo.get_in_path(filename)
         
-        # CORREÇÃO 1: Evita crash caso o arquivo não seja encontrado ou esteja vazio
         if not historical_data:
             logging.error(f"❌ Falha: Não foi possível carregar os dados de {filename}.")
             return
@@ -26,13 +24,11 @@ def validate_product_times(filename: str = 'wk16.csv'):
         dados_produtos = []
         tempo_total_fabrica = 0.0
 
-        # 2. Varre as linhas e audita o tempo que cada produto consumiu na máquina alocada
         for line in estado_historico.get_allocations():
             line_id = line.plan_line_id
             todas_ops = line.pinned_products + line.products
             
             for op in todas_ops:
-                # O tempo real gasto é o tempo mapeado para a linha onde ele foi de fato alocado
                 tempo_producao = op.total_time.get(line_id, 0.0)
                 tempo_total_fabrica += tempo_producao
                 
@@ -45,7 +41,6 @@ def validate_product_times(filename: str = 'wk16.csv'):
                     "Status": "Alocado Corretamente"
                 })
 
-        # 3. Audita produtos que o humano não alocou (ou alocou errado)
         nao_alocados = estado_historico.get_non_allocations()
         if nao_alocados and nao_alocados.products:
             for op in nao_alocados.products:
@@ -58,20 +53,16 @@ def validate_product_times(filename: str = 'wk16.csv'):
                     "Status": "NÃO ALOCADO / INCOMPATÍVEL"
                 })
 
-        # 4. Transforma em um DataFrame para visualização elegante
         df = pd.DataFrame(dados_produtos)
 
-        # 5. Imprime um resumo executivo no terminal
         print("\n📊 RESUMO DE CARGA POR LINHA (Apenas Produção, sem Setup):")
         resumo_linhas = df.groupby("Linha Alocada")["Tempo de Produção (Horas)"].sum().reset_index()
         print(resumo_linhas.to_string(index=False))
         
         print(f"\n⏳ Tempo total líquido de produção da fábrica: {tempo_total_fabrica / 60:.2f} horas")
 
-        # 6. Salva o Raio-X completo em um CSV auditável
         csv_name = f"auditoria_tempos_{filename.split('.')[0]}.csv"
         
-        # CORREÇÃO 2 e 3: Ajuste de sep=';' e decimal=',' para compatibilidade total com Excel BR
         df.to_csv(csv_name, index=False, sep=',', decimal=',', encoding='utf-8-sig')
         
         print(f"\n✅ Relatório analítico completo salvo como: {csv_name}")

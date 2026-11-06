@@ -10,9 +10,6 @@ class ProductionPlanRepository(BaseRepository):
         self._delimiter = delimiter
 
     def get(self, file_name: str) -> list[PlanItem]:
-        """
-        Lê e retorna os itens do plano de produção a partir de um arquivo CSV específico.
-        """
         plan_items: list[PlanItem] = []
         file_path = self.db_local_path / file_name
         

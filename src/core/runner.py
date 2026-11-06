@@ -1,23 +1,17 @@
 import logging
 import time
 import random
-import sys  # Importado para sair limpo em caso de Ctrl+C
+import sys
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from core.base_tester import BaseTester
 from core.simulated_annealing import SimulatedAnnealing
 
 def _sa_worker(cenario_tupla):
-    """
-    Desempacota a tarefa, roda o Simulated Annealing e retorna a resposta.
-    Blinda o processo contra exceções individuais para não derrubar a batch inteira.
-    """
     metadata, state, kwargs = cenario_tupla
-    kwargs = dict(kwargs)  # não mutar o dict compartilhado entre cenários
+    kwargs = dict(kwargs)
     try:
         idle_flag = kwargs.pop('idle', True)
         seed = kwargs.pop('seed', None)
-        # A semente precisa ser aplicada aqui, no processo worker.
-        # `is not None` para que a semente 0 também seja válida.
         if seed is not None:
             random.seed(seed)
         sa = SimulatedAnnealing(**kwargs)
@@ -47,8 +41,7 @@ class Runner:
                     
                     try:
                         scenarios = tester.generate_scenarios()
-                        
-                        
+
                         total_scenarios = len(scenarios)
                         logging.info(f"[{tester.test_name}] {total_scenarios} cenários gerados. Executando...")
                         

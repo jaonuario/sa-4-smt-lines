@@ -14,6 +14,5 @@ class Penalty:
     TYPE_OVEN_PENALTY: float = 5.0
 
     def __post_init__(self) -> None:
-        # Valida dinamicamente se qualquer atributo da instância é menor que 0
         if any(value < 0 for value in self.__dict__.values()):
             raise ValueError("Nenhuma penalidade pode ser negativa.")

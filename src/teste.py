@@ -2,9 +2,8 @@ import logging
 import time
 from repository.historical_balancing_repository import HistoricalBalancingRepository
 from tools.loader import ScenarioBuilder, HISTORICAL_FULL
-from tools.state_metrics import StateMetrics # Confirme se o caminho do import está correto
+from tools.state_metrics import StateMetrics
 
-# Configuração limpa do log para o terminal
 logging.basicConfig(level=logging.INFO, format='%(message)s')
 
 def validate_historical_energy(filename: str = 'wk16.csv'):
@@ -15,21 +14,16 @@ def validate_historical_energy(filename: str = 'wk16.csv'):
     start_time = time.time()
     
     try:
-        # 1. Carrega o arquivo csv do histórico
         repo = HistoricalBalancingRepository()
         historical_data = repo.get_in_path(filename)
         
-        # 2. Constrói o estado fiel ao que os humanos fizeram na fábrica
-        # O inicialization=False (que definimos no loader) garante que a IA não interfira
         builder = ScenarioBuilder(full=HISTORICAL_FULL)
         estado_historico, _ = builder.load_historical(historical_data)
         
-        # 3. Extrai as métricas usando a classe isolada
         metrics = StateMetrics(estado_historico)
         
         exec_time = time.time() - start_time
         
-        # 4. Imprime o "Raio-X" da solução humana
         print(f"\n 📊 KPIs DO PLANEJAMENTO HISTÓRICO (HUMANO)")
         print("-" * 60)
         print(f" ⚡ Energia Total (Baseline)      : {metrics.total_energy:.2f}")
@@ -55,5 +49,4 @@ def validate_historical_energy(filename: str = 'wk16.csv'):
         logging.exception(f"Erro crítico durante a validação: {e}")
 
 if __name__ == "__main__":
-    # Roda a validação para o arquivo wk16.csv
     validate_historical_energy('wk16.csv')

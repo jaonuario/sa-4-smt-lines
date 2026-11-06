@@ -64,7 +64,6 @@ class MaxTempTester(BaseTester):
         self.plot_iterations_count(results_dict, self.get_save_path('count_iterations.png'))
         self.plot_exec_times(results_dict, self.get_save_path('execution_time.png'))
 
-
     def _build_dataset(self, results_dict, extract_func, aggregate_func):
         dataset = []
         for _, result_list in results_dict.items():

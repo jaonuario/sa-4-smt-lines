@@ -64,7 +64,6 @@ class FreezingCoefTester(BaseTester):
         self.plot_iterations_count(results_dict, self.get_save_path('count_iterations.png'))
         self.plot_exec_times(results_dict, self.get_save_path('execution_time.png'))
 
-
     def _build_dataset(self, results_dict, extract_func, aggregate_func):
         dataset = []
         for _, result_list in results_dict.items():
@@ -98,4 +97,3 @@ class FreezingCoefTester(BaseTester):
     def plot_exec_times(self, results, path):
         dataset = self._build_dataset(results, lambda r: r.execution_time, lambda v: sum(v)/len(v))
         plotar_multiplas_retas(dados=dataset, dataset_names=list(results.keys()), path=path, normalizar_y=False, title="Tempo de execução(norm)")
-        

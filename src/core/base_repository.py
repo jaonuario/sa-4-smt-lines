@@ -4,9 +4,6 @@ from pathlib import Path
 
 class BaseRepository:
     def __init__(self, db_path: Path | str | None = None) -> None:
-        """
-        Inicializa o repositório base com resolução inteligente de caminhos.
-        """
         self.db_local_path = self._resolve_db_path(db_path)
         self._ensure_directory_exists()
 
@@ -22,7 +19,6 @@ class BaseRepository:
         return fallback_path
 
     def _ensure_directory_exists(self) -> None:
-        """Garante que a pasta física exista, prevenindo erros ao escrever arquivos."""
         if not self.db_local_path.exists():
             logging.warning(f"[BaseRepository] Diretório de banco de dados não encontrado. Criando em: {self.db_local_path}")
             self.db_local_path.mkdir(parents=True, exist_ok=True)

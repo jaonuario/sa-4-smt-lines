@@ -10,9 +10,8 @@ from tools.loader import ScenarioBuilder, HISTORICAL_FULL
 class TestHistorico(BaseTester):
     def __init__(self):
         super().__init__(test_name="hist_vs_otimiz")
-        self.num_runs = 30  # Rigor estatístico: 30 rodadas por cenário
+        self.num_runs = 30
         
-        # Escopo de Análise: Múltiplas semanas para testar variabilidade da fábrica
         self.list_path = [
             'wk16.csv', 'wk17.csv', 'wk18.csv', 'wk19.csv', 'wk20.csv', 
             'wk22.csv', 'wk23.csv', 'wk24.csv', 'wk25.csv'
@@ -32,7 +31,6 @@ class TestHistorico(BaseTester):
         return state_list
 
     def generate_scenarios(self) -> list[tuple[dict[str, Any], State, dict[str, Any]]]:
-        """Gera 300 cenários (10 semanas x 30 rodadas) para a Têmpera Simulada."""
         history = self.load_history()
         kwargs = {
                 "high_temp": 10.0,
@@ -62,18 +60,14 @@ class TestHistorico(BaseTester):
 
         from collections import defaultdict
         
-        # 1. Agrupar as energias finais (best_energy) de cada rodada pela semana correspondente
         weekly_energies = defaultdict(list)
         
         for metadata, response in results:
-            # Extrai o nome da semana e remove o .csv para o gráfico ficar mais limpo
             semana = metadata["base_file"].replace('.csv', '') 
             weekly_energies[semana].append(response.best_energy)
             
         logging.info(f"[{self.test_name}] Resultados agrupados. Gerando Box Plot de variância...")
 
-        # 2. Importar a função de plotagem e gerar o gráfico
-        # Se você já tiver a plot_variance_boxplot no seu visualization.boxplot, utilize-a:
         try:
             from visualization.boxplot import plot_variance_boxplot
             
@@ -92,7 +86,6 @@ class TestHistorico(BaseTester):
             logging.info(f"[{self.test_name}] Gráfico salvo em {save_path}")
             
         except ImportError:
-            # Fallback seguro: caso não tenha a função isolada, plotamos diretamente aqui
             import matplotlib.pyplot as plt
             
             sorted_weeks = sorted(weekly_energies.keys())

@@ -27,7 +27,6 @@ class AlgorithmTester(BaseTester):
         builder_synth = ScenarioBuilder(num_lines=3, full=True)
         scenarios = []
         
-        # Parâmetros únicos para evitar duplicação de código
         kwargs = {
             "high_temp": 1000.0,
             "freezing_temp": 0.01,
@@ -35,7 +34,6 @@ class AlgorithmTester(BaseTester):
             "idle": True
         }
         
-        # 1. GERANDO LOTE REAL (Com restrições da fábrica)
         for i in range(1, self.num_runs + 1):
             alloc, ops = builder_real.load_basic("production_plan.csv")
             state = SMTState(allocations=alloc, product_orders=ops)
@@ -43,7 +41,6 @@ class AlgorithmTester(BaseTester):
             metadata = {"name": f"real_{i}", "is_synthetic": False, "seed": seed}
             scenarios.append((metadata, state, {**kwargs, "seed": seed}))
 
-        # 2. GERANDO LOTE SINTÉTICO (Fábrica flexível/relaxada)
         for i in range(1, self.num_runs + 1):
             alloc, ops = builder_synth.load_basic("production_plan.csv")
             state = SMTState(allocations=alloc, product_orders=ops)

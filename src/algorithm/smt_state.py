@@ -48,7 +48,6 @@ class SMTState(State):
 
     @property
     def energy(self) -> float:
-        """Calcula o custo total da solução."""
         if self._energy is not None:
             return self._energy
         
@@ -65,14 +64,11 @@ class SMTState(State):
             for i in range(len(ops)):
                 op = ops[i]
 
-                # 1. Hard Constraint: Incompatibilidade
                 if line.plan_line_id not in op.total_time:
                     return self._penalty.INCOMPATIBILITY_PENALTY
 
-                # 2. Tempo de Produção:
                 line_proc_time += op.total_time[line.plan_line_id]
 
-                # 3. Custo de Setup (Agora usando a TransitionTools)
                 if i < len(ops) - 1:
                     next_op = ops[i + 1]
                     line_setup_cost += self._transition_tools.calculate_transition_cost(op, next_op)
@@ -90,7 +86,6 @@ class SMTState(State):
                     min_priority_seen_ahead = op.priority
 
             current_workload: float = line_proc_time + line_setup_cost
-            # 5. Penalidade de Disponibilidade         
             if line.availability:
                 delta = line.availability - current_workload
                 
@@ -107,7 +102,6 @@ class SMTState(State):
         if not workloads:
             return self._penalty.INCOMPATIBILITY_PENALTY
 
-        # 6. Penalidade de Balanceamento (Makespan)
         mean_workload = sum(workloads) / len(workloads)
         balance_penalty = math.sqrt(sum(((w - mean_workload) ** 2) / len(workloads) for w in workloads))
 
@@ -122,7 +116,6 @@ class SMTState(State):
         return self._energy
 
     def next_state(self) -> "SMTState":
-        """Gera um estado vizinho através de mutações estocásticas com garantia de alteração."""        
         new_allocations = [line.copy() for line in self._allocations]
         new_non_alloc = self._non_allocation.copy() if self._non_allocation else None
         
@@ -134,14 +127,12 @@ class SMTState(State):
         attempts = 0
         MAX_ATTEMPTS = 15
 
-        # Pré-filtros executados uma única vez para evitar sorteios inúteis
         linhas_com_produtos = [l for l in all_lines if l.products]
         linhas_com_multiplos_produtos = [l for l in all_lines if len(l.products) >= 2]
 
         if not linhas_com_produtos or (len(linhas_com_produtos) == 1 and not linhas_com_multiplos_produtos and len(all_lines) == 1):
             return self._generate_new_state(new_alloc=new_allocations, new_non_alloc=new_non_alloc)
 
-        # Loop de garantia: o SA não vai desperdiçar ciclos avaliando estados idênticos
         while not mutated and attempts < MAX_ATTEMPTS:
             movimento = random.choices(
                 population=["inter_swap", "move", "intra_swap"], 
@@ -169,7 +160,6 @@ class SMTState(State):
                 op_idx = random.randrange(len(l_orig.products))
                 op_candidata = l_orig.products[op_idx]
                 
-                # Hard Constraint: Destino deve suportar a OP
                 destinos_validos = [
                     l for l in all_lines 
                     if l != l_orig and (l.plan_line_id in op_candidata.total_time or l.plan_line_id == self.RESERVED_ID)
@@ -180,14 +170,12 @@ class SMTState(State):
                     op = l_orig.products.pop(op_idx)
                     l_dest.products.insert(random.randint(0, len(l_dest.products)), op)
                     
-                    # Atualiza o filtro dinamicamente caso a linha de origem tenha esvaziado
                     if not l_orig.products:
                         linhas_com_produtos.remove(l_orig)
                         
                     mutated = True
 
             elif movimento == "intra_swap" and linhas_com_multiplos_produtos:
-                # Sorteia direto de linhas que sabidamente têm 2 ou mais OPs
                 l1 = random.choice(linhas_com_multiplos_produtos)
                 idx1, idx2 = random.sample(range(len(l1.products)), 2)
                 l1.products[idx1], l1.products[idx2] = l1.products[idx2], l1.products[idx1]

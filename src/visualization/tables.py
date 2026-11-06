@@ -8,18 +8,10 @@ from entities.smt_entities import LineAllocation
     
 
 def table_responses(results: list[tuple[dict[str, Any], Response]], save_path: str = 'responses_table.csv') -> None:
-    """
-    Gera um arquivo CSV rico contendo métricas do motor e da fábrica para múltiplas execuções.
-    
-    Args:
-        results: Lista de tuplas contendo os metadados do cenário e a Resposta do algoritmo.
-        save_path: Caminho do arquivo onde a tabela será salva.
-    """
     if not results:
         logging.warning("[table_responses] A lista de resultados está vazia. Tabela não gerada.")
         return
 
-    # Cabeçalhos enriquecidos
     headers = [
         "Cenário",
         "Energia Inicial",
@@ -36,26 +28,21 @@ def table_responses(results: list[tuple[dict[str, Any], Response]], save_path: s
     ]
 
     try:
-        # utf-8-sig insere o BOM (Byte Order Mark), obrigando o Excel a ler os acentos corretamente
         with open(save_path, mode='w', newline='', encoding='utf-8-sig') as file:
-            # Delimitador corrigido para ';' conforme padrão pt-BR
             writer = csv.writer(file, delimiter=',') 
             writer.writerow(headers)
 
             for metadata, resp in results:
-                # 1. Cálculos de Otimização
                 melhoria_abs = resp.initial_energy - resp.best_energy
                 melhoria_pct = (melhoria_abs / resp.initial_energy) * 100 if resp.initial_energy != 0 else 0
                 iter_por_seg = resp.iterations / resp.execution_time if resp.execution_time > 0 else 0
                 
-                # 2. Extração de Dados da Fábrica (SMTState)
                 state = resp.best_state
                 linhas_ativas = sum(1 for line in state.get_allocations() if line.total_ops > 0)
                 
                 non_alloc = state.get_non_allocations()
                 ops_nao_alocadas = len(non_alloc.products) if non_alloc else 0
 
-                # 3. Escrita da Linha
                 writer.writerow([
                     str(metadata["name"]),
                     round(resp.initial_energy, 2),

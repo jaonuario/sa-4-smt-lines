@@ -56,7 +56,6 @@ class SimulatedAnnealing:
         current_state = initial_state
         best_state = initial_state
         
-        # Cache das energias para evitar recálculos custosos em problemas complexos
         current_energy = current_state.energy
         best_energy = current_energy
         
@@ -86,8 +85,7 @@ class SimulatedAnnealing:
                 else:
                     if idle:
                         idle_time += 1
-                
-                
+
             else:
                 if idle:
                     idle_time += 1
@@ -97,7 +95,6 @@ class SimulatedAnnealing:
             temperature *= self._freezing_coef
             int_counter += 1
 
-        # Cálculo do tempo movido para fora do loop
         execution_time = time.perf_counter() - start_time
 
         logging.debug(f"[simulated annealing] Melhor estado: Energia={best_energy:.4f}, em {int_counter} iterações")
