@@ -1,0 +1,15 @@
+# Banco de dados fonte
+database/fonte/
+
+# Resultados de testes gerados
+test_results/
+
+# Arquivos compilados do Python (Opcional, mas recomendado)
+__pycache__/
+
+# Arquivos de log
+logs/app.log
+
+# Texto do TCC e apresentação (mantidos apenas localmente)
+documento/
+Apresentação/

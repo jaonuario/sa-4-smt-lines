@@ -1,0 +1,5 @@
+# from testers.historical_comparison import HistoricalComparisonTest
+# from testers.penalty_sensitivity import PenaltySensitivityTester
+from testers.test_algorithm import AlgorithmTester
+# from testers.max_temp_tester import MaxTemperatureComparisonTest
+# from testers.test_stop_criteria import StopCriteriaComparisonTest
